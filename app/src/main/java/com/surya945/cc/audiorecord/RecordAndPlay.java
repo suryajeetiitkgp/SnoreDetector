@@ -22,7 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 
-public class MainActivity extends AppCompatActivity {
+public class RecordAndPlay extends AppCompatActivity {
 
     Button buttonStart, buttonStop, buttonPlayLastRecordAudio,
             buttonStopPlayingRecording ;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_recordplay);
 
         buttonStart = (Button) findViewById(R.id.button);
         buttonStop = (Button) findViewById(R.id.button2);
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                     buttonStart.setEnabled(false);
                     buttonStop.setEnabled(true);
 
-                    Toast.makeText(MainActivity.this, "Recording started",
+                    Toast.makeText(RecordAndPlay.this, "Recording started",
                             Toast.LENGTH_LONG).show();
                 } else {
                     requestPermission();
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonStart.setEnabled(true);
                 buttonStopPlayingRecording.setEnabled(false);
 
-                Toast.makeText(MainActivity.this, "Recording Completed",
+                Toast.makeText(RecordAndPlay.this, "Recording Completed",
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 mediaPlayer.start();
-                Toast.makeText(MainActivity.this, "Recording Playing",
+                Toast.makeText(RecordAndPlay.this, "Recording Playing",
                         Toast.LENGTH_LONG).show();
             }
         });
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(MainActivity.this, new
+        ActivityCompat.requestPermissions(RecordAndPlay.this, new
                 String[]{WRITE_EXTERNAL_STORAGE, RECORD_AUDIO}, RequestPermissionCode);
     }
 
@@ -176,10 +176,10 @@ public class MainActivity extends AppCompatActivity {
                             PackageManager.PERMISSION_GRANTED;
 
                     if (StoragePermission && RecordPermission) {
-                        Toast.makeText(MainActivity.this, "Permission Granted",
+                        Toast.makeText(RecordAndPlay.this, "Permission Granted",
                                 Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(MainActivity.this,"Permission Denied",Toast.LENGTH_LONG).show();
+                        Toast.makeText(RecordAndPlay.this,"Permission Denied",Toast.LENGTH_LONG).show();
                     }
                 }
                 break;

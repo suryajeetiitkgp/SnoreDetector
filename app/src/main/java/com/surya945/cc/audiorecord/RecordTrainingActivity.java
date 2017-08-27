@@ -29,6 +29,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RecordTrainingActivity extends AppCompatActivity {
     String LOG_TAG="Tag";
@@ -42,13 +44,14 @@ public class RecordTrainingActivity extends AppCompatActivity {
     List<List<Short>>Normal=new ArrayList(80000);
     final int SAMPLE_RATE = 4000;
     TextView SnoreDataLength,NormalDataLength;
-
+    ExecutorService oneThreade;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recordtraining);
         handlerClass=new HandlerClass();
 
+        this.oneThreade=Executors.newFixedThreadPool(1);
 
         Button btnSave=(Button)findViewById(R.id.btnSave);
         Button btnNormal=(Button)findViewById(R.id.btnNormal);
@@ -233,7 +236,7 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
         return s;
     }
     public void GetDataPoints(List<Short>data){
-
+        //List<DataPoint>
     }
     class HandlerClass extends Handler {
         HandlerClass() {
