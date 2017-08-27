@@ -40,8 +40,8 @@ public class RecordTrainingActivity extends AppCompatActivity {
     boolean storing=false;
     boolean mSnore=false,mNormal=false;
     boolean mShouldContinue=true;
-    List<List<Short>>Snore=new ArrayList(80000);
-    List<List<Short>>Normal=new ArrayList(80000);
+    List<List<Short>>Snore=new ArrayList();
+    List<List<Short>>Normal=new ArrayList();
     final int SAMPLE_RATE = 4000;
     TextView SnoreDataLength,NormalDataLength;
     ExecutorService oneThreade;
@@ -56,12 +56,12 @@ public class RecordTrainingActivity extends AppCompatActivity {
         Button btnSave=(Button)findViewById(R.id.btnSave);
         Button btnNormal=(Button)findViewById(R.id.btnNormal);
         Button btnSnore=(Button)findViewById(R.id.btnSnore);
-Button ClearData=(Button)findViewById(R.id.ClearData);
+        Button ClearData=(Button)findViewById(R.id.ClearData);
         ClearData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snore=new ArrayList<List<Short>>(4000);
-                Normal=new ArrayList<List<Short>>(4000);
+                Snore=new ArrayList<List<Short>>();
+                Normal=new ArrayList<List<Short>>();
                 handlerClass.obtainMessage(3).sendToTarget();
                 handlerClass.obtainMessage(4).sendToTarget();
             }
@@ -72,7 +72,7 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
         final TextView textView=(TextView)findViewById(R.id.textView);
         final EditText fileName=(EditText)findViewById(R.id.editTextFileName);
 
-        recordAudio();
+
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +89,7 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     textView.setText("Button Pressed");
                     mSnore=true;
+                    recordAudioSnore();
                 }
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     textView.setText(""); //finger was lifted
@@ -106,6 +107,7 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
                     textView.setText("Button Pressed");
                     mNormal=true;
+                    recordAudioNormal();
                 }
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     textView.setText(""); //finger was lifted
@@ -117,31 +119,11 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
         });
 
 
-        graphView=(GraphView)findViewById(R.id.graphView);
-        graphView.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-        // graph_x.getViewport().setScalableY(true); // enables vertical zooming and scrolling
-
-
-        graphView.getViewport().setYAxisBoundsManual(true);
-        graphView.getViewport().setMinY(0);
-        graphView.getViewport().setMaxY(30);
-
-
-        // data
-        series = new LineGraphSeries<DataPoint>();
-        series.setTitle("sqrt(x*x+y*y+z*z)");
-        series.setColor(Color.RED);
-
-        graphView.addSeries(series);
-
-        graphView.getLegendRenderer().setVisible(true);
-        graphView.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
-
     }
 
 
 
-    void recordAudio() {
+    void recordAudioSnore() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -173,31 +155,66 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
                 Log.v(LOG_TAG, "Start recording");
                 short snore=0;
                 long shortsRead = 0,count=0;
-                while (mShouldContinue) {
-                    if(mSnore){
-                        int numberOfShort = record.read(audioBuffer, 0, audioBuffer.length);
-                        List<Short> newData=new ArrayList<>(4000);
-                        shortsRead += numberOfShort;
-                        for (int i=0;i<numberOfShort;i++){
-                            newData.add(audioBuffer[i]);
-                        }
-                        newData.add((short)1);
-                        Snore.add(newData);
-                        handlerClass.obtainMessage(3).sendToTarget();
-
-                    }else if(mNormal){
-                        int numberOfShort = record.read(audioBuffer, 0, audioBuffer.length);
-                        List<Short> newData=new ArrayList<>(4000);
-                        shortsRead += numberOfShort;
-                        for (int i=0;i<numberOfShort;i++){
-                            newData.add(audioBuffer[i]);
-                        }
-                        newData.add((short)0);
-                        Normal.add(newData);
-                        handlerClass.obtainMessage(4).sendToTarget();
+                while (mSnore) {
+                    int numberOfShort = record.read(audioBuffer, 0, audioBuffer.length);
+                    List<Short> newData = new ArrayList<>();
+                    shortsRead += numberOfShort;
+                    for (int i = 0; i < numberOfShort; i++) {
+                        newData.add(audioBuffer[i]);
                     }
+                    newData.add((short) 1);
+                    Snore.add(newData);
+                    handlerClass.obtainMessage(3).sendToTarget();
+                }
+                record.stop();
+                record.release();
 
+                Log.v(LOG_TAG, String.format("Recording stopped. Samples read: %d", shortsRead));
+            }
+        }).start();
+    }
+    void recordAudioNormal() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
 
+                // buffer size in bytes
+                int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT);
+
+                if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
+                    bufferSize = SAMPLE_RATE * 2;
+                }
+
+                short[] audioBuffer = new short[bufferSize / 2];
+
+                AudioRecord record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
+                        SAMPLE_RATE,
+                        AudioFormat.CHANNEL_IN_MONO,
+                        AudioFormat.ENCODING_PCM_16BIT,
+                        bufferSize);
+
+                if (record.getState() != AudioRecord.STATE_INITIALIZED) {
+                    Log.e(LOG_TAG, "Audio Record can't initialize!");
+                    return;
+                }
+                record.startRecording();
+
+                Log.v(LOG_TAG, "Start recording");
+                short snore=0;
+                long shortsRead = 0,count=0;
+                while (mNormal) {
+                    int numberOfShort = record.read(audioBuffer, 0, audioBuffer.length);
+                    List<Short> newData=new ArrayList<>();
+                    shortsRead += numberOfShort;
+                    for (int i=0;i<numberOfShort;i++){
+                        newData.add(audioBuffer[i]);
+                    }
+                    newData.add((short)0);
+                    Normal.add(newData);
+                    handlerClass.obtainMessage(4).sendToTarget();
 
                 }
 
@@ -229,7 +246,7 @@ Button ClearData=(Button)findViewById(R.id.ClearData);
         for (int i=0;i<data.size();i++){
             String row="";
             for (int j=0;j<data.get(i).size();j++){
-               row+=data.get(i).get(j)+" ";
+                row+=data.get(i).get(j)+" ";
             }
             s+=row+"\n";
         }

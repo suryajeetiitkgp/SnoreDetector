@@ -1,6 +1,7 @@
 package com.surya945.cc.audiorecord;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -215,6 +216,14 @@ public class Main2Activity extends AppCompatActivity {
     }
     public void OnStopClick(View view){
         mShouldContinue=false;
+    }
+    public void OnSaveTrainingDataClick(View view){
+        Intent intent=new Intent(Main2Activity.this,RecordTrainingActivity.class);
+        startActivity(intent);
+    }
+    public void OnRecordPlayClick(View view){
+        Intent intent=new Intent(Main2Activity.this,RecordAndPlay.class);
+        startActivity(intent);
     }
 
 }
