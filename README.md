@@ -1,5 +1,12 @@
 # SnoreDetector
 
+# What this app does?
+  It detects if a person is snoring or not.
+  
+# What Next will be done (Pending work)?
+  1. Need to collect the snore data and normal data.
+  2. Make a Nueral Network model to train it to detect the snoring data.
+  
 ## Main Screen where live recording data is displaying in the graph
 ![screenshot_2017-08-28-14-11-03](https://user-images.githubusercontent.com/31389262/29766119-55a9f112-8bfb-11e7-95b3-f9b0f7c2d6da.png)
 ## After Clicking the "Save Data for Training the Neyral Network" These actvity opens where you can record Snore and Normal Data for training
